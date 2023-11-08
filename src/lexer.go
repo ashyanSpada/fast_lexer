@@ -1,15 +1,14 @@
 package src
 
 import (
+	"io"
 	"regexp"
 	"strings"
-
-	"golang.org/x/text/runes"
 )
 
 type Lexer struct {
 	cur    int
-	source []rune
+	reader *strings.Reader
 	tokens []Token
 }
 
@@ -27,23 +26,37 @@ func (l *Lexer) Next() Token {
 
 func NewLexer(input string) *Lexer {
 	return &Lexer{
-		source: []rune(input),
+		reader: strings.NewReader(input),
 	}
 }
 
 func (l *Lexer) parseLiteral(token Token) (Token, bool) {
 	patterns := token.Config().Literal
 	for _, pattern := range patterns {
-		m := len(l.source[l.cur:])
-		n := len(pattern)
-		if m < n {
-			continue
+		patternReader := strings.NewReader(pattern)
+		tmpReader := *l.reader
+		matched := false
+		cnt := 0
+		for a, _, err := patternReader.ReadRune(); err == nil; {
+			b, _, err1 := tmpReader.ReadRune()
+			if err1 != nil || a != b {
+				break
+			}
+			cnt++
 		}
-		if runeListEqual(l.source[l.cur:l.cur+n], []rune(pattern)) && (m == n || isWhiteSpaceChar(l.source[l.cur+n])) {
-			output := token.New()
-			output.Source(l.source[l.cur : l.cur+n])
-			l.cur += n
-			return output, true
+		b, _, err := tmpReader.ReadRune()
+		if err != nil || isWhiteSpaceChar(b) {
+			matched = true
+		}
+		if matched {
+			var ans []rune
+			for i := 0; i < cnt; i++ {
+				a, _, _ := l.reader.ReadRune()
+				ans = append(ans, a)
+			}
+			result := token.New()
+			result.Source(ans)
+			return result, true
 		}
 	}
 	return nil, false
@@ -55,7 +68,11 @@ func (l *Lexer) parseRegexp(token Token) (Token, bool) {
 		return nil, false
 	}
 
-	pattern.FindReaderIndex()
+	ans := pattern.FindReaderIndex(l.reader)
+	if len(ans) != 2 {
+		return nil, false
+	}
+	a, b := fffff========================================
 }
 
 func runeListEqual(a, b []rune) bool {

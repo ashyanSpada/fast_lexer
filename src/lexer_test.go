@@ -2,24 +2,21 @@ package src
 
 import (
 	"fmt"
-	"reflect"
 	"testing"
 )
 
 func TestLexer(t *testing.T) {
-	input := "true false True False"
+	input := "true false True False ( ) { } [ ] -124.123 123e-03"
 	lexer := NewLexer(input)
-	lexer.RegisterToken(new(BoolToken).WithConfig(TokenConfig{
-		Literal: []string{"true", "false", "True", "False"},
-	}), new(BracketToken).WithConfig(TokenConfig{
-		Literal: []string{"(", ")", "{", "}", "[", "]"},
-	}))
-	for {
+
+	lexer.RegisterToken(new(BoolToken), new(BracketToken), new(NumberToken))
+
+	for i := 0; i < 100; i++ {
 		token, ok := lexer.Next()
-		fmt.Println(token, ok)
+		fmt.Println(token, "parseOk", ok)
 		if !ok {
 			break
 		}
-		fmt.Println(reflect.TypeOf(token))
 	}
+
 }

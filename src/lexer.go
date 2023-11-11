@@ -7,7 +7,6 @@ import (
 )
 
 type Lexer struct {
-	cur    int
 	reader *strings.Reader
 	tokens []Token
 }
@@ -25,7 +24,6 @@ func NewLexer(input string) *Lexer {
 func (l *Lexer) Next() (Token, bool) {
 	l.eatWhitespace()
 	for _, tokenConfig := range l.tokens {
-		fmt.Println("tokenConfig", tokenConfig)
 		token, ok := l.parseLiteral(tokenConfig)
 		if ok {
 			return token, true
@@ -60,26 +58,23 @@ func (l *Lexer) parseLiteral(token Token) (Token, bool) {
 	for _, pattern := range patterns {
 		patternReader := strings.NewReader(pattern)
 		tmpReader := *l.reader
-		matched := false
+		matched := true
 		cnt := 0
-		for a, _, err := patternReader.ReadRune(); err == nil; {
+		for a, _, err := patternReader.ReadRune(); err == nil; a, _, err = patternReader.ReadRune() {
 			b, _, err1 := tmpReader.ReadRune()
 			if err1 != nil || a != b {
+				matched = false
 				break
 			}
 			cnt++
 		}
 		b, _, err := tmpReader.ReadRune()
-		if err != nil || isWhiteSpaceChar(b) {
-			matched = true
+		if err == nil && !isWhiteSpaceChar(b) {
+			matched = false
 		}
 		if matched {
-			var ans []rune
-			for i := 0; i < cnt; i++ {
-				a, _, _ := l.reader.ReadRune()
-				ans = append(ans, a)
-			}
-			return token.New(ans), true
+			l.reader = &tmpReader
+			return token.New([]rune(pattern)), true
 		}
 	}
 	return nil, false
@@ -91,10 +86,11 @@ func (l *Lexer) parseRegexp(token Token) (Token, bool) {
 	}
 	pattern, err := regexp.Compile(*token.Config().Regexp)
 	if err != nil {
+		fmt.Println("compile expr", err)
 		return nil, false
 	}
-
-	loc := pattern.FindReaderIndex(l.reader)
+	tmpReader := *l.reader
+	loc := pattern.FindReaderIndex(&tmpReader)
 	if len(loc) != 2 {
 		return nil, false
 	}
@@ -149,26 +145,15 @@ func (l *Lexer) peekNRune(n int) ([]rune, error) {
 
 func eatNByte(reader *strings.Reader, n int) ([]rune, error) {
 	var ans []rune
-	for i := 0; i < n; i++ {
-		tmp, _, err := reader.ReadRune()
+	for i := 0; i < n; {
+		tmp, size, err := reader.ReadRune()
+		i += size
 		if err != nil {
 			return nil, err
 		}
 		ans = append(ans, tmp)
 	}
 	return ans, nil
-}
-
-func runeListEqual(a, b []rune) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
 }
 
 func isWhiteSpaceChar(input rune) bool {

@@ -1,5 +1,7 @@
 package src
 
+import "fmt"
+
 type TokenConfig struct {
 	Regexp  *string
 	Literal []string
@@ -7,28 +9,11 @@ type TokenConfig struct {
 
 type Token interface {
 	Config() TokenConfig
-	WithConfig(config TokenConfig) Token
 	New([]rune) Token
 }
 
-type CommonToken struct {
-	TokenConfig
-	source []rune
-}
-
-func (c *CommonToken) Config() TokenConfig {
-	return c.TokenConfig
-}
-
-func (c *CommonToken) New(input []rune) CommonToken {
-	return CommonToken{
-		TokenConfig: c.TokenConfig,
-		source:      input,
-	}
-}
-
 type BoolToken struct {
-	CommonToken
+	source []rune
 }
 
 func (b *BoolToken) IsTrue() bool {
@@ -41,28 +26,34 @@ func (b *BoolToken) IsFalse() bool {
 
 func (b *BoolToken) New(input []rune) Token {
 	return &BoolToken{
-		CommonToken: b.CommonToken.New(input),
+		source: input,
 	}
 }
 
-func (b *BoolToken) WithConfig(config TokenConfig) Token {
-	b.TokenConfig = config
-	return b
+func (b *BoolToken) Config() TokenConfig {
+	return TokenConfig{
+		Literal: []string{"true", "false", "True", "False"},
+	}
+}
+
+func (b *BoolToken) String() string {
+	return fmt.Sprintf("BoolToken: %s", string(b.source))
 }
 
 type BracketToken struct {
-	CommonToken
+	source []rune
 }
 
 func (b *BracketToken) New(input []rune) Token {
 	return &BracketToken{
-		CommonToken: b.CommonToken.New(input),
+		source: input,
 	}
 }
 
-func (b *BracketToken) WithConfig(config TokenConfig) Token {
-	b.TokenConfig = config
-	return b
+func (b *BracketToken) Config() TokenConfig {
+	return TokenConfig{
+		Literal: []string{"(", ")", "[", "]", "{", "}"},
+	}
 }
 
 func (b *BracketToken) IsLeftBracket() bool {
@@ -87,4 +78,29 @@ func (b *BracketToken) IsLeftBrace() bool {
 
 func (b *BracketToken) IsRightBrace() bool {
 	return string(b.source) == ")"
+}
+
+func (b *BracketToken) String() string {
+	return fmt.Sprintf("BracketToken: %s", string(b.source))
+}
+
+type NumberToken struct {
+	input []rune
+}
+
+func (n *NumberToken) New(input []rune) Token {
+	return &NumberToken{
+		input: input,
+	}
+}
+
+func (n *NumberToken) Config() TokenConfig {
+	reg := "-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?"
+	return TokenConfig{
+		Regexp: &reg,
+	}
+}
+
+func (n *NumberToken) String() string {
+	return fmt.Sprintf("NumberToken: %s", string(n.input))
 }

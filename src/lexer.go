@@ -1,7 +1,6 @@
 package src
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -86,7 +85,6 @@ func (l *Lexer) parseRegexp(token Token) (Token, bool) {
 	}
 	pattern, err := regexp.Compile(*token.Config().Regexp)
 	if err != nil {
-		fmt.Println("compile expr", err)
 		return nil, false
 	}
 	tmpReader := *l.reader

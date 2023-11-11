@@ -85,12 +85,12 @@ func (b *BracketToken) String() string {
 }
 
 type NumberToken struct {
-	input []rune
+	source []rune
 }
 
 func (n *NumberToken) New(input []rune) Token {
 	return &NumberToken{
-		input: input,
+		source: input,
 	}
 }
 
@@ -102,5 +102,27 @@ func (n *NumberToken) Config() TokenConfig {
 }
 
 func (n *NumberToken) String() string {
-	return fmt.Sprintf("NumberToken: %s", string(n.input))
+	return fmt.Sprintf("NumberToken: %s", string(n.source))
+}
+
+type StringToken struct {
+	source []rune
+}
+
+func (s *StringToken) New(input []rune) Token {
+	return &StringToken{
+		source: input,
+	}
+}
+
+func (s *StringToken) Config() TokenConfig {
+	// reg := "(^\"[.|\\\"]*\"$)|(^'[.|\\']*'$)"
+	reg := "^\"[.|(\\\")]*\"$"
+	return TokenConfig{
+		Regexp: &reg,
+	}
+}
+
+func (s *StringToken) String() string {
+	return fmt.Sprintf("StringToken: %s", string(s.source))
 }

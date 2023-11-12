@@ -117,7 +117,7 @@ func (s *StringToken) New(input []rune) Token {
 
 func (s *StringToken) Config() TokenConfig {
 	// reg := "(^\"[.|\\\"]*\"$)|(^'[.|\\']*'$)"
-	reg := "^\"[.|(\\\")]*\"$"
+	reg := `^"(.|(\\\"))*"`
 	return TokenConfig{
 		Regexp: &reg,
 	}
@@ -125,4 +125,25 @@ func (s *StringToken) Config() TokenConfig {
 
 func (s *StringToken) String() string {
 	return fmt.Sprintf("StringToken: %s", string(s.source))
+}
+
+type LiteralToken struct {
+	source []rune
+}
+
+func (l *LiteralToken) New(input []rune) Token {
+	return &LiteralToken{
+		source: input,
+	}
+}
+
+func (l *LiteralToken) Config() TokenConfig {
+	reg := `[_a-zA-Z][_a-zA-Z0-9]{0,30}`
+	return TokenConfig{
+		Regexp: &reg,
+	}
+}
+
+func (l *LiteralToken) String() string {
+	return fmt.Sprintf("IdentifierToken: %s", string(l.source))
 }

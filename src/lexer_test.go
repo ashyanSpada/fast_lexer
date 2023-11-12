@@ -59,7 +59,7 @@ func TestLexer_Next(t *testing.T) {
 				&StringToken{
 					source: []rune("\"ha你好ha\""),
 				},
-				&LiteralToken{
+				&IdentifierToken{
 					source: []rune("haha"),
 				},
 			},
@@ -73,7 +73,7 @@ func TestLexer_Next(t *testing.T) {
 				new(BracketToken),
 				new(NumberToken),
 				new(StringToken),
-				new(LiteralToken),
+				new(IdentifierToken),
 			)
 			var tokens []Token
 			for {

@@ -127,23 +127,23 @@ func (s *StringToken) String() string {
 	return fmt.Sprintf("StringToken: %s", string(s.source))
 }
 
-type LiteralToken struct {
+type IdentifierToken struct {
 	source []rune
 }
 
-func (l *LiteralToken) New(input []rune) Token {
-	return &LiteralToken{
+func (i *IdentifierToken) New(input []rune) Token {
+	return &IdentifierToken{
 		source: input,
 	}
 }
 
-func (l *LiteralToken) Config() TokenConfig {
+func (i *IdentifierToken) Config() TokenConfig {
 	reg := `[_a-zA-Z][_a-zA-Z0-9]{0,30}`
 	return TokenConfig{
 		Regexp: &reg,
 	}
 }
 
-func (l *LiteralToken) String() string {
-	return fmt.Sprintf("IdentifierToken: %s", string(l.source))
+func (i *IdentifierToken) String() string {
+	return fmt.Sprintf("IdentifierToken: %s", string(i.source))
 }

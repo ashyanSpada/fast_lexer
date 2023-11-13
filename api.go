@@ -7,6 +7,7 @@ type Lexer = internal.Lexer
 type TokenConfig = internal.TokenConfig
 
 type (
+	Token           = internal.Token
 	BoolToken       = internal.BoolToken
 	BracketToken    = internal.BracketToken
 	StringToken     = internal.StringToken

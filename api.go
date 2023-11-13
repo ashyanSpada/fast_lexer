@@ -1,15 +1,15 @@
 package fast_lexer
 
-import "github.com/ashyanSpada/fast_lexer/src"
+import "github.com/ashyanSpada/fast_lexer/internal"
 
-type Lexer = src.Lexer
+type Lexer = internal.Lexer
 
-type TokenConfig = src.TokenConfig
+type TokenConfig = internal.TokenConfig
 
 type (
-	BoolToken       = src.BoolToken
-	BracketToken    = src.BracketToken
-	StringToken     = src.StringToken
-	NumberToken     = src.NumberToken
-	IdentifierToken = src.IdentifierToken
+	BoolToken       = internal.BoolToken
+	BracketToken    = internal.BracketToken
+	StringToken     = internal.StringToken
+	NumberToken     = internal.NumberToken
+	IdentifierToken = internal.IdentifierToken
 )

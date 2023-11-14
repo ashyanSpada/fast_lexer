@@ -157,5 +157,5 @@ func eatNByte(reader *strings.Reader, n int) ([]rune, error) {
 }
 
 func isWhiteSpaceChar(input rune) bool {
-	return input == rune('\t') || input == rune(' ') || input == rune('\n')
+	return input == rune('\t') || input == rune(' ')
 }

@@ -77,8 +77,8 @@ func TestLexer_Next(t *testing.T) {
 			)
 			var tokens []Token
 			for {
-				token, ok := l.Next()
-				if !ok {
+				token, err := l.Next()
+				if err != nil || token == nil {
 					break
 				}
 				tokens = append(tokens, token)

@@ -1,7 +1,9 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"regexp"
 	"strings"
 )
@@ -21,19 +23,30 @@ func NewLexer(input string) *Lexer {
 	}
 }
 
-func (l *Lexer) Next() (Token, bool) {
+func (l *Lexer) Next() (Token, error) {
 	l.eatWhitespace()
+	if l.isEnd() {
+		return nil, nil
+	}
 	for _, tokenConfig := range l.tokens {
 		token, ok := l.parseLiteral(tokenConfig)
 		if ok {
-			return token, true
+			return token, nil
 		}
 		token, ok = l.parseRegexp(tokenConfig)
 		if ok {
-			return token, true
+			return token, nil
 		}
 	}
-	return nil, false
+	return nil, errors.New("no matched pattern")
+}
+
+func (l *Lexer) isEnd() bool {
+	tmpReader := *l.reader
+	if _, err := tmpReader.ReadByte(); err == io.EOF {
+		return true
+	}
+	return false
 }
 
 func (l *Lexer) eatWhitespace() {
@@ -157,5 +170,5 @@ func eatNByte(reader *strings.Reader, n int) ([]rune, error) {
 }
 
 func isWhiteSpaceChar(input rune) bool {
-	return input == rune('\t') || input == rune(' ') || input == rune('\n')
+	return input == rune('\t') || input == rune(' ')
 }

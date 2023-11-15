@@ -25,7 +25,7 @@ func NewLexer(input string) *Lexer {
 
 func (l *Lexer) Next() (Token, error) {
 	l.eatWhitespace()
-	if l.isEnd() {
+	if l.IsEnd() {
 		return nil, nil
 	}
 	for _, tokenConfig := range l.tokens {
@@ -41,7 +41,7 @@ func (l *Lexer) Next() (Token, error) {
 	return nil, errors.New("no matched pattern")
 }
 
-func (l *Lexer) isEnd() bool {
+func (l *Lexer) IsEnd() bool {
 	tmpReader := *l.reader
 	if _, err := tmpReader.ReadByte(); err == io.EOF {
 		return true

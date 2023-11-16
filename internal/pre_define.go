@@ -101,13 +101,13 @@ type StringToken struct {
 
 func (s *StringToken) New(input []rune) Token {
 	return &StringToken{
-		source: input,
+		source: input[1 : len(input)-1],
 	}
 }
 
 func (s *StringToken) Config() TokenConfig {
 	// reg := "(^\"[.|\\\"]*\"$)|(^'[.|\\']*'$)"
-	reg := `^"(.|(\\\"))*"`
+	reg := `^"([^"\\\\]*|\\\\["\\\\bfnrt\/]|\\\\u[0-9a-f]{4})*"`
 	return TokenConfig{
 		Regexp: &reg,
 	}
@@ -132,7 +132,7 @@ func (i *IdentifierToken) New(input []rune) Token {
 }
 
 func (i *IdentifierToken) Config() TokenConfig {
-	reg := `[_a-zA-Z][_a-zA-Z0-9]{0,30}`
+	reg := `^[_a-zA-Z][_a-zA-Z0-9]{0,30}`
 	return TokenConfig{
 		Regexp: &reg,
 	}

@@ -57,7 +57,7 @@ func TestLexer_Next(t *testing.T) {
 					source: []rune("123e-03"),
 				},
 				&StringToken{
-					source: []rune("\"ha你好ha\""),
+					source: []rune("ha你好ha"),
 				},
 				&IdentifierToken{
 					source: []rune("haha"),

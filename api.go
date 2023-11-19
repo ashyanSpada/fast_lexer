@@ -14,3 +14,7 @@ type (
 	NumberToken     = internal.NumberToken
 	IdentifierToken = internal.IdentifierToken
 )
+
+func NewLexer(input string) *Lexer {
+	return internal.NewLexer(input)
+}

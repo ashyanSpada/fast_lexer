@@ -150,7 +150,6 @@ func TestLexer_IsEnd(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-
 		t.Run(tt.name, func(t *testing.T) {
 			l := getTestLexer(tt.fields.input)
 			if got := l.IsEnd(); got != tt.want {
@@ -161,7 +160,7 @@ func TestLexer_IsEnd(t *testing.T) {
 }
 
 func getTestLexer(input string) *Lexer {
-	l := NewLexer(input)
+	l := NewLexer(input, EnableSingletonOpt)
 	l.RegisterToken(
 		new(BoolToken),
 		new(BracketToken),

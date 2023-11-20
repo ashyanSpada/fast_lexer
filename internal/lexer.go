@@ -8,19 +8,34 @@ import (
 	"strings"
 )
 
+type Opt = func(*Lexer)
+
 type Lexer struct {
-	reader *strings.Reader
-	tokens []Token
+	singleton bool
+	reader    *strings.Reader
+	tokens    []*SingletonTokenWrapper
 }
 
-func (l *Lexer) RegisterToken(token ...Token) {
-	l.tokens = append(l.tokens, token...)
+func (l *Lexer) RegisterToken(tokens ...Token) {
+	wrappers := make([]*SingletonTokenWrapper, 0, len(tokens))
+	for _, token := range tokens {
+		wrappers = append(wrappers, NewSingletonWrapper(token))
+	}
+	l.tokens = append(l.tokens, wrappers...)
 }
 
-func NewLexer(input string) *Lexer {
-	return &Lexer{
+func EnableSingletonOpt(l *Lexer) {
+	l.singleton = true
+}
+
+func NewLexer(input string, opts ...Opt) *Lexer {
+	l := &Lexer{
 		reader: strings.NewReader(input),
 	}
+	for _, opt := range opts {
+		opt(l)
+	}
+	return l
 }
 
 func (l *Lexer) Next() (Token, error) {
@@ -28,12 +43,12 @@ func (l *Lexer) Next() (Token, error) {
 	if l.IsEnd() {
 		return nil, nil
 	}
-	for _, tokenConfig := range l.tokens {
-		token, ok := l.parseLiteral(tokenConfig)
+	for _, tokenWrapper := range l.tokens {
+		token, ok := l.parseLiteral(tokenWrapper, l.singleton)
 		if ok {
 			return token, nil
 		}
-		token, ok = l.parseRegexp(tokenConfig)
+		token, ok = l.parseRegexp(tokenWrapper, l.singleton)
 		if ok {
 			return token, nil
 		}
@@ -73,11 +88,11 @@ func (l *Lexer) eatWhitespace() {
 
 }
 
-func (l *Lexer) parseLiteral(token Token) (Token, bool) {
-	if token.Config().Literal == nil {
+func (l *Lexer) parseLiteral(tokenWrapper *SingletonTokenWrapper, singleton bool) (Token, bool) {
+	if tokenWrapper.Config().Literal == nil {
 		return nil, false
 	}
-	patterns := token.Config().Literal
+	patterns := tokenWrapper.Config().Literal
 	for _, pattern := range patterns {
 		patternReader := strings.NewReader(pattern)
 		tmpReader := *l.reader
@@ -97,19 +112,19 @@ func (l *Lexer) parseLiteral(token Token) (Token, bool) {
 		}
 		if matched {
 			l.reader = &tmpReader
-			return token.New([]rune(pattern)), true
+			return tokenWrapper.New([]rune(pattern), singleton), true
 		}
 	}
 	return nil, false
 }
 
-func (l *Lexer) parseRegexp(token Token) (Token, bool) {
-	if token.Config().Regexp == nil {
+func (l *Lexer) parseRegexp(tokenWrapper *SingletonTokenWrapper, singleton bool) (Token, bool) {
+	if tokenWrapper.Config().Regexp == nil {
 		return nil, false
 	}
-	pattern, err := regexp.Compile(*token.Config().Regexp)
+	pattern, err := regexp.Compile(*tokenWrapper.Config().Regexp)
 	if err != nil {
-		fmt.Println("compile err:", *token.Config().Regexp)
+		fmt.Println("compile err:", *tokenWrapper.Config().Regexp)
 		return nil, false
 	}
 	tmpReader := *l.reader
@@ -122,7 +137,7 @@ func (l *Lexer) parseRegexp(token Token) (Token, bool) {
 	if err != nil {
 		return nil, false
 	}
-	return token.New(ans), true
+	return tokenWrapper.New(ans, singleton), true
 }
 
 func (l *Lexer) nextRune() (rune, error) {

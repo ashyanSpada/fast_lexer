@@ -6,6 +6,12 @@ type Lexer = internal.Lexer
 
 type TokenConfig = internal.TokenConfig
 
+type Opt = internal.Opt
+
+func EnableSingletonOpt(lexer *Lexer) {
+	internal.EnableSingletonOpt(lexer)
+}
+
 type (
 	Token           = internal.Token
 	BoolToken       = internal.BoolToken
@@ -15,6 +21,6 @@ type (
 	IdentifierToken = internal.IdentifierToken
 )
 
-func NewLexer(input string) *Lexer {
-	return internal.NewLexer(input)
+func NewLexer(input string, opts ...Opt) *Lexer {
+	return internal.NewLexer(input, opts...)
 }

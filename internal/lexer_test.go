@@ -161,7 +161,7 @@ func TestLexer_IsEnd(t *testing.T) {
 }
 
 func getTestLexer(input string) *Lexer {
-	l := NewLexer(input)
+	l := NewLexer(input, EnableSingletonOpt)
 	l.RegisterToken(
 		new(BoolToken),
 		new(BracketToken),

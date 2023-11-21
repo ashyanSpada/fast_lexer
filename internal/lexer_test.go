@@ -171,3 +171,16 @@ func getTestLexer(input string) *Lexer {
 	)
 	return l
 }
+
+func BenchmarkLexer(b *testing.B) {
+	input := "true false True False ( )  { } [ ] -124.123 123e-03 \"ha你好ha\" haha"
+	for i := 0; i < b.N; i++ {
+		l := getTestLexer(input)
+		for {
+			token, err := l.Next()
+			if err != nil || token == nil {
+				break
+			}
+		}
+	}
+}
